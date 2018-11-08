@@ -13,13 +13,14 @@
 //#define COMP_CPU
 
 // define macro OUTPUT to print input & output matrix
-#define OUTPUT
+//#define OUTPUT
 
 // define macro QUERY_DEVICES to print device information
-#define QUERY_DEVICES
+//#define QUERY_DEVICES
 
 void checkCUDAError(const char *msg);
 
+float checkCorrectness(float *C, float *C_test, int size);
 void zeroMatrix(float *A, int n);
 void dstMatrix(float *A, int n);
 void CPU_matrixMult(float *A, float *B, float *C, int n, int repeats);
@@ -33,7 +34,7 @@ int main(int argc, const char *argv[]) {
    int n, m; /* n=matrix size, m=repeats */
    
    cudaEvent_t start_timer, stop_timer;
-   float gpu_time;
+   float gpu_time, cpu_time;
  
 #ifdef QUERY_DEVICES
    // Number of CUDA devices
@@ -95,6 +96,28 @@ int main(int argc, const char *argv[]) {
    cudaMemcpy(Ad, A, size, cudaMemcpyHostToDevice); checkCUDAError("copy to device for A");
    cudaMemcpy(Bd, B, size, cudaMemcpyHostToDevice); checkCUDAError("copy to device for B");
    cudaMemcpy(Cd, C, size, cudaMemcpyHostToDevice); checkCUDAError("copy to device for C");
+   
+   // DONE: check correctness of CUDA_matrixMult. Does not work yet
+//    float *C_cuda = (float *) malloc(size);
+//    zeroMatrix(C_cuda,n);
+//    CPU_matrixMult(A, B, C, n, 1);
+//    CUDA_matrixMult(Ad,Bd,Cd,n,1);
+//    cudaMemcpy(C_cuda, Cd, size, cudaMemcpyDeviceToHost); checkCUDAError("copy back to host for C_cuda");
+//    float error = checkCorrectness(C, C_cuda, size);
+//    if (error != 0.0f) {
+//       fprintf(stderr, "\nCUDA Mult is incorrect. Error: %f.\n", error);
+//       exit(-1);
+//    }
+//    zeroMatrix(C,n);
+   
+   // DONE: CPU execution time to compare
+   cudaEventRecord(start_timer, 0);
+   CPU_matrixMult(A, B, C, n, m);
+   cudaEventRecord(stop_timer, 0);
+   cudaEventSynchronize(stop_timer);
+   cudaEventElapsedTime(&cpu_time, start_timer, stop_timer);
+   printf("CPU Elapsed time : %.3f s \n", cpu_time / 1000.0f);
+   printf("CPU Performance  : %.0f MFlop/s \n", float(m) * (2.0f * n - 1.0f) * n * n / (cpu_time / 1000.0f * 1024.f * 1024.f));
 #endif
 
    /* perform matrix multiplication (m repeats) */
@@ -138,6 +161,16 @@ int main(int argc, const char *argv[]) {
    cudaEventDestroy(stop_timer);
 
    return(0);
+}
+
+// does not work yet
+float checkCorrectness(float *C, float *C_test, int size) {
+   float error = 0.0f;
+   for (int i = 0; i < size; i++) {
+      error = C[i] - C_test[i];
+      if (error != 0.0f) return(error);
+   }
+   return 0.0f;
 }
 
 /* set Matrix values to zero */
@@ -190,11 +223,12 @@ void CPU_matrixMult(float *A, float *B, float *C, int n, int repeats) {
  *      "Programming Massively Parallel Processors, chapter 3)
  */
 __host__ void CUDA_matrixMult(float *Ad, float *Bd, float *Cd, int n, int repeats) {
-   dim3 dimBlock(n,n);
-   dim3 dimGrid(1,1);
+   dim3 dimBlock(TILE_SIZE,TILE_SIZE);
+   dim3 dimGrid(n/TILE_SIZE,n/TILE_SIZE);
    
    for(int i=0; i<repeats; i++) {
-       matrixMultKernel_global<<<dimGrid,dimBlock>>>(Ad,Bd,Cd,n);
+      //matrixMultKernel_global<<<dimGrid,dimBlock>>>(Ad,Bd,Cd,n);
+      matrixMultKernel_tiled<<<dimGrid, dimBlock>>>(Ad,Bd,Cd,n);
    }
 
    checkCUDAError("matrix multiplication kernel failed");
