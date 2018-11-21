@@ -70,7 +70,28 @@ __global__ void matrixMultKernel_tiled(float* Ad, float* Bd, float* Cd, int n)
  */
 __global__ void matrixMultKernel_coalesced(float* Ad, float* Bd, float* Cd, int n)
 {
-   /* TODO: implement coalesced matrix multiplication */
+   __shared__ float Ads[TILE_SIZE][TILE_SIZE];
+   __shared__ float Bds[TILE_SIZE][TILE_SIZE];
+
+   int tx = threadIdx.x;
+   int ty = threadIdx.y;
+   
+   int i = blockIdx.y * TILE_SIZE + ty;
+   int k = blockIdx.x * TILE_SIZE + tx;
+   
+   float Celem = 0;
+   
+   for(int m=0; m < n/TILE_SIZE; m++) {
+      Ads[ty][tx] = Ad[ i*n + m*TILE_SIZE+tx];
+      Bds[ty][tx] = Bd[ (m*TILE_SIZE+ty)*n + k];
+      __syncthreads();
+      
+      for(int j=0; j<TILE_SIZE; j++)
+	     Celem += Ads[ty][j]*Bds[j][tx];
+   
+      __syncthreads();
+   };
+   Cd[i*n+k] += Celem;
 }
 
 
