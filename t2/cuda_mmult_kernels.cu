@@ -107,5 +107,34 @@ __global__ void matrixMultKernel_coalesced(float* Ad, float* Bd, float* Cd, int 
  */
 __global__ void matrixMultKernel_overlap(float* Ad, float* Bd, float* Cd, int n)
 {
-   /* TODO: implement overlapped matrix multiplication */
+   /* DONE: implement overlapped matrix multiplication */
+   __shared__ float Ads[TILE_SIZE][TILE_SIZE];
+   __shared__ float Bds[TILE_SIZE][TILE_SIZE];
+   
+   float Celem = 0;
+   float nextAelem = Ad[(blockIdx.y * TILE_SIZE + threadIdx.y)*n + threadIdx.x];
+   float nextBelem = Bd[threadIdx.y*n + (blockIdx.x * TILE_SIZE + threadIdx.x)];
+   
+   int j = 0;
+   for(int m=1; m < n/TILE_SIZE; m++) {
+      Ads[threadIdx.y][threadIdx.x] = nextAelem;
+      Bds[threadIdx.y][threadIdx.x] = nextBelem;
+      nextAelem = Ad[(blockIdx.y * TILE_SIZE + threadIdx.y)*n + m*TILE_SIZE + threadIdx.x];
+      nextBelem = Bd[(m*TILE_SIZE+threadIdx.y)*n + (blockIdx.x * TILE_SIZE + threadIdx.x)];
+      __syncthreads();
+      
+      for(j=0; j<TILE_SIZE; j++)
+	     Celem += Ads[threadIdx.y][j] * Bds[j][threadIdx.x];
+   
+      __syncthreads();
+   };
+   
+   Ads[threadIdx.y][threadIdx.x] = nextAelem;
+   Bds[threadIdx.y][threadIdx.x] = nextBelem;
+   __syncthreads();
+      
+   for(j=0; j<TILE_SIZE; j++)
+      Celem += Ads[threadIdx.y][j] * Bds[j][threadIdx.x];
+   
+   Cd[(blockIdx.y * TILE_SIZE + threadIdx.y)*n+ (blockIdx.x * TILE_SIZE + threadIdx.x)] += Celem;
 }

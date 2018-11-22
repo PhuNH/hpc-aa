@@ -192,8 +192,8 @@ __host__ void CUDA_matrixMult(float *Ad, float *Bd, float *Cd, int n, int repeat
    for(int i=0; i<repeats; i++) {
       // matrixMultKernel_global<<<dimGrid,dimBlock>>>(Ad,Bd,Cd,n);
       // matrixMultKernel_tiled<<<dimGrid,dimBlock>>>(Ad,Bd,Cd,n);
-       matrixMultKernel_coalesced<<<dimGrid,dimBlock>>>(Ad,Bd,Cd,n);
-      // matrixMultKernel_overlap<<<dimGrid,dimBlock>>>(Ad,Bd,Cd,n);
+      // matrixMultKernel_coalesced<<<dimGrid,dimBlock>>>(Ad,Bd,Cd,n);
+       matrixMultKernel_overlap<<<dimGrid,dimBlock>>>(Ad,Bd,Cd,n);
    }
    checkCUDAError("matrix multiplication kernel failed");
 }
