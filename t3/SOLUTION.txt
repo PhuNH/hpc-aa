@@ -1,0 +1,69 @@
+%%MatrixMarket matrix coordinate pattern general
+9 9 12
+
+Iterations = 1, err = 6.296297e-01, sum = 1.000000
+Iterations = 2, err = 5.351852e-01, sum = 1.000000
+Iterations = 3, err = 4.169984e-01, sum = 1.000000
+Iterations = 4, err = 3.544487e-01, sum = 1.000000
+Iterations = 5, err = 2.638495e-01, sum = 1.000000
+Iterations = 6, err = 2.242721e-01, sum = 1.000000
+Iterations = 7, err = 1.861239e-01, sum = 1.000000
+Iterations = 8, err = 1.582053e-01, sum = 1.000000
+Iterations = 9, err = 1.339317e-01, sum = 1.000000
+Iterations = 10, err = 1.138420e-01, sum = 1.000000
+Iterations = 11, err = 9.670036e-02, sum = 1.000000
+Iterations = 12, err = 8.219527e-02, sum = 1.000000
+Iterations = 13, err = 6.985805e-02, sum = 1.000000
+Iterations = 14, err = 5.937934e-02, sum = 1.000000
+Iterations = 15, err = 5.047146e-02, sum = 1.000000
+Iterations = 16, err = 4.290076e-02, sum = 1.000000
+Iterations = 17, err = 3.646553e-02, sum = 1.000000
+Iterations = 18, err = 3.099568e-02, sum = 1.000000
+Iterations = 19, err = 2.634633e-02, sum = 1.000000
+Iterations = 20, err = 2.239442e-02, sum = 1.000000
+Iterations = 21, err = 1.903528e-02, sum = 1.000000
+Iterations = 22, err = 1.617998e-02, sum = 1.000000
+Iterations = 23, err = 1.375300e-02, sum = 1.000000
+Iterations = 24, err = 1.169008e-02, sum = 1.000000
+Iterations = 25, err = 9.936571e-03, sum = 1.000000
+Iterations = 26, err = 8.446097e-03, sum = 1.000000
+Iterations = 27, err = 7.179201e-03, sum = 1.000000
+Iterations = 28, err = 6.102324e-03, sum = 1.000000
+Iterations = 29, err = 5.186975e-03, sum = 1.000000
+Iterations = 30, err = 4.408926e-03, sum = 1.000000
+Iterations = 31, err = 3.747582e-03, sum = 1.000000
+Iterations = 32, err = 3.185451e-03, sum = 1.000000
+Iterations = 33, err = 2.707660e-03, sum = 1.000000
+Iterations = 34, err = 2.301514e-03, sum = 1.000000
+Iterations = 35, err = 1.956284e-03, sum = 1.000000
+Iterations = 36, err = 1.662850e-03, sum = 1.000000
+Iterations = 37, err = 1.413405e-03, sum = 1.000000
+Iterations = 38, err = 1.201391e-03, sum = 1.000000
+Iterations = 39, err = 1.021206e-03, sum = 1.000000
+Iterations = 40, err = 8.680224e-04, sum = 1.000000
+Iterations = 41, err = 7.377863e-04, sum = 1.000000
+Iterations = 42, err = 6.271005e-04, sum = 1.000000
+Iterations = 43, err = 5.330443e-04, sum = 1.000000
+Iterations = 44, err = 4.531145e-04, sum = 1.000000
+Iterations = 45, err = 3.851652e-04, sum = 1.000000
+Iterations = 46, err = 3.274083e-04, sum = 1.000000
+Iterations = 47, err = 2.782941e-04, sum = 1.000000
+Iterations = 48, err = 2.365112e-04, sum = 1.000000
+Iterations = 49, err = 2.010167e-04, sum = 1.000000
+Iterations = 50, err = 1.708865e-04, sum = 1.000000
+Iterations = 51, err = 1.452565e-04, sum = 1.000000
+Iterations = 52, err = 1.234412e-04, sum = 1.000000
+Iterations = 53, err = 1.049042e-04, sum = 1.000000
+Iterations = 54, err = 8.916855e-05, sum = 1.000000
+
+
+Solution: 
+x_1 = 3.602992e-01
+x_2 = 2.700142e-02
+x_3 = 6.238353e-02
+x_4 = 2.431707e-02
+x_5 = 4.042290e-01
+x_6 = 2.700142e-02
+x_7 = 2.431707e-02
+x_8 = 5.378454e-02
+x_9 = 1.666666e-02
