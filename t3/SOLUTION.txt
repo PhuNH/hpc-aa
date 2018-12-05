@@ -1,3 +1,5 @@
+my.mtx
+
 %%MatrixMarket matrix coordinate pattern general
 9 9 12
 
@@ -67,3 +69,68 @@ x_6 = 2.700142e-02
 x_7 = 2.431707e-02
 x_8 = 5.378454e-02
 x_9 = 1.666666e-02
+
+real    0m2.298s
+user    0m0.015s
+sys     0m1.438s
+
+====
+usroads.mtx
+
+%%MatrixMarket matrix coordinate pattern symmetric
+129164 129164 330870
+
+Iterations = 1, err = 2.633409e-01, sum = 0.999612
+Iterations = 2, err = 1.545999e-01, sum = 0.999981
+Iterations = 3, err = 1.057289e-01, sum = 1.000010
+Iterations = 4, err = 7.588641e-02, sum = 0.999992
+Iterations = 5, err = 5.626887e-02, sum = 1.000004
+Iterations = 6, err = 4.251633e-02, sum = 1.000001
+Iterations = 7, err = 3.260489e-02, sum = 1.000002
+Iterations = 8, err = 2.525775e-02, sum = 1.000010
+Iterations = 9, err = 1.973183e-02, sum = 1.000002
+Iterations = 10, err = 1.551479e-02, sum = 1.000007
+Iterations = 11, err = 1.226325e-02, sum = 1.000001
+Iterations = 12, err = 9.736095e-03, sum = 1.000002
+Iterations = 13, err = 7.757353e-03, sum = 0.999998
+Iterations = 14, err = 6.201411e-03, sum = 1.000000
+Iterations = 15, err = 4.970931e-03, sum = 0.999986
+Iterations = 16, err = 3.994328e-03, sum = 1.000007
+Iterations = 17, err = 3.216389e-03, sum = 0.999989
+Iterations = 18, err = 2.594952e-03, sum = 1.000001
+Iterations = 19, err = 2.097071e-03, sum = 0.999999
+Iterations = 20, err = 1.697490e-03, sum = 1.000000
+Iterations = 21, err = 1.375882e-03, sum = 0.999999
+Iterations = 22, err = 1.116733e-03, sum = 1.000001
+Iterations = 23, err = 9.074454e-04, sum = 1.000002
+Iterations = 24, err = 7.382076e-04, sum = 0.999999
+Iterations = 25, err = 6.011917e-04, sum = 1.000004
+Iterations = 26, err = 4.900434e-04, sum = 1.000002
+Iterations = 27, err = 3.998355e-04, sum = 1.000004
+Iterations = 28, err = 3.264741e-04, sum = 1.000003
+Iterations = 29, err = 2.668087e-04, sum = 1.000005
+Iterations = 30, err = 2.181978e-04, sum = 1.000001
+Iterations = 31, err = 1.785763e-04, sum = 1.000002
+Iterations = 32, err = 1.462472e-04, sum = 1.000001
+Iterations = 33, err = 1.198469e-04, sum = 1.000001
+Iterations = 34, err = 9.827289e-05, sum = 1.000000
+
+
+Solution: 
+x_1 = 3.953533e-06
+x_2 = 9.854897e-06
+x_3 = 3.971144e-06
+x_4 = 8.905668e-06
+x_5 = 4.219816e-06
+x_6 = 4.147289e-06
+x_7 = 1.079474e-05
+x_8 = 1.053847e-05
+x_9 = 9.917169e-06
+x_10 = 7.201460e-06
+
+Maximum:
+x_58611 = 1.780732e-05
+
+real    0m2.548s
+user    0m0.272s
+sys     0m2.212s

@@ -23,18 +23,15 @@ extern "C" void ELLmatvecmult(int N, int num_cols_per_row , int * indices, float
  * Cuda kernel for: CSR_s(A)x = y
  */
 __global__ void k_csr_mat_vec_mm(int *ptr, int* indices, float *data, int num_rows, float *x, float* y) {
-    int row = blockDim.x * blockIdx.x + threadIdx.x ;
-
-    if ( row < num_rows ){
-        float dot = 0;
-        int row_start = ptr [row];
-        int row_end = ptr [row+1];
-
-        for (int jj = row_start; jj < row_end; jj++) {
-            dot += data [jj] * x [indices[jj]];
+    //TODO: implement the CSR kernel
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i < num_rows) {
+        float temp = 0;
+        int start = ptr[i], end = ptr[i+1]; // ptr: coalesced
+        for (int k = start; k < end; k++) {
+            temp += data[k] * x[indices[k]]; // x, data, indices: uncoalesced
         }
-
-        y[row] += dot;
+        y[i] = temp; // y: coalesced
     }
 }
 
@@ -43,6 +40,41 @@ __global__ void k_csr_mat_vec_mm(int *ptr, int* indices, float *data, int num_ro
  */
 __global__ void k_csr2_mat_vec_mm(int *ptr, int* indices, float *data, int num_rows, float *x, float* y) {
     //TODO: implement the vectorized csr kernel
+    /*
+     * i) Set grid and block size in the kernel call accordingly
+     * ii) Assign a matrix row to each warp now
+     * iii) Allocate a shared array vals[] for the partial results of a block
+     * iv) Compute one row × vector product in a loop. This time, parallelize the loop over all 32 threads in the warp. Take care that access to the arrays indices and data is coalesced.
+     * v) Use a reduction of some kind (ideally: binary fan-in) to add up the partial sums in vals[] and add the output to the result vector.
+     */
+    __shared__ float vals[WARP_SIZE][WARP_SIZE];
+    int tx = threadIdx.x, ty = threadIdx.y;
+    int row_in_grid = blockIdx.y * blockDim.y + ty;
+    if (row_in_grid < num_rows) {
+        int k, l, p;
+        int start = ptr[row_in_grid], end = ptr[row_in_grid+1];
+        float temp = 0;
+        for (k = tx + start; k < end; k += WARP_SIZE) {
+            temp += data[k] * x[indices[k]];
+        }
+        vals[ty][tx] = temp;
+        __syncthreads();
+        
+        for (k = 1; k < 6; k++) {
+            p = (int) powf(2,k-1);
+            for (l = 0; l < WARP_SIZE/(2*p); l++) {
+                vals[ty][2*p*l] += vals[ty][2*p*l+p];
+            }
+            /*l = threadIdx.x / (2*p); // for (l = 0; l < WARP_SIZE/(p+1); l++)
+            l *= 4*p;
+            l += p - threadIdx.x;
+            temp = vals[threadIdx.y][l];
+            __syncthreads();
+            vals[threadIdx.y][threadIdx.x] += temp;
+            __syncthreads();*/
+        }
+        y[row_in_grid] = vals[threadIdx.y][0];
+    }
 }
 
 /**
@@ -95,8 +127,8 @@ void CSRmatvecmult(int* ptr, int* J, float* Val, int N, int nnz, float* x, float
 
     if (bVectorized) {
         //TODO: define grid and block size correctly
-        dim3 grid(0, 0, 0);
-        dim3 block(0, 0, 0);
+        dim3 grid(1, (N - 1)/WARP_SIZE + 1, 1);
+        dim3 block(WARP_SIZE, WARP_SIZE, 1);
 
         k_csr2_mat_vec_mm<<<grid, block>>>(ptr_d, J_d, Val_d, N, x_d, y_d);
     } else {
