@@ -47,11 +47,17 @@ __global__ void k_csr2_mat_vec_mm(int *ptr, int* indices, float *data, int num_r
      * iv) Compute one row × vector product in a loop. This time, parallelize the loop over all 32 threads in the warp. Take care that access to the arrays indices and data is coalesced.
      * v) Use a reduction of some kind (ideally: binary fan-in) to add up the partial sums in vals[] and add the output to the result vector.
      */
+    /* no vectorization
+     * usroads.mtx
+     * real    0m2.548s
+     * user    0m0.272s
+     * sys     0m2.212s
+     */
     __shared__ float vals[WARP_SIZE][WARP_SIZE];
     int tx = threadIdx.x, ty = threadIdx.y;
     int row_in_grid = blockIdx.y * blockDim.y + ty;
     if (row_in_grid < num_rows) {
-        int k, l, p;
+        int k;
         int start = ptr[row_in_grid], end = ptr[row_in_grid+1];
         float temp = 0;
         for (k = tx + start; k < end; k += WARP_SIZE) {
@@ -60,19 +66,34 @@ __global__ void k_csr2_mat_vec_mm(int *ptr, int* indices, float *data, int num_r
         vals[ty][tx] = temp;
         __syncthreads();
         
+        // First attempt
+        /* vectorized, sum by loop
+         * usroads.mtx
+         * real    0m2.781s
+         * user    0m0.288s
+         * sys     0m1.683s
+         */
+        /*int l, p;
         for (k = 1; k < 6; k++) {
-            p = (int) powf(2,k-1);
+            p = (int) powf(2, k-1);
             for (l = 0; l < WARP_SIZE/(2*p); l++) {
                 vals[ty][2*p*l] += vals[ty][2*p*l+p];
             }
-            /*l = threadIdx.x / (2*p); // for (l = 0; l < WARP_SIZE/(p+1); l++)
-            l *= 4*p;
-            l += p - threadIdx.x;
-            temp = vals[threadIdx.y][l];
+        }*/
+        // Second attempt
+        /* vectorized, sum by binary fan-in
+         * usroads.mtx
+         * real    0m2.627s
+         * user    0m0.212s
+         * sys     0m1.543s
+         */
+        for (k = 1; k < WARP_SIZE; k *= 2) {
+            if (tx % (2*k) == 0) {
+                vals[ty][tx] += vals[ty][tx+k];
+            }
             __syncthreads();
-            vals[threadIdx.y][threadIdx.x] += temp;
-            __syncthreads();*/
         }
+        // End of two attempts
         y[row_in_grid] = vals[threadIdx.y][0];
     }
 }
