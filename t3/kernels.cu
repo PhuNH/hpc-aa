@@ -64,7 +64,7 @@ __global__ void k_csr2_mat_vec_mm(int *ptr, int* indices, float *data, int num_r
             temp += data[k] * x[indices[k]];
         }
         vals[ty][tx] = temp;
-        __syncthreads();
+        //__syncthreads();
         
         // First attempt
         /* vectorized, sum by loop
@@ -91,7 +91,7 @@ __global__ void k_csr2_mat_vec_mm(int *ptr, int* indices, float *data, int num_r
             if (tx % (2*k) == 0) {
                 vals[ty][tx] += vals[ty][tx+k];
             }
-            __syncthreads();
+            //__syncthreads();
         }
         // End of two attempts
         y[row_in_grid] = vals[threadIdx.y][0];
