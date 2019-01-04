@@ -128,10 +128,10 @@ __global__ void k_ell_mat_vec_mm (const int N, const int num_cols_per_row, int *
 		float dot = 0;
 		for (int n = 0; n < num_cols_per_row ; n++) {
 			// TODO: Uncomment and complete the sample.
-			int col = indices[row * num_cols_per_row + n];
-			float val = data[row * num_cols_per_row + n];
+			int col = indices[row + N * n];
+			float val = data[row + N * n];
 			if (val != 0) {
-				dot += val * x[row];
+				dot += val * x[col];
 			}
 		}
 		y[row] = dot;

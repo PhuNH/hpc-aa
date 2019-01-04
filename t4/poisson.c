@@ -14,7 +14,7 @@
 #include <cusparse_v2.h>
 #include <cublas_v2.h>
 
-//#define GNUPLOT
+#define GNUPLOT
 #if defined GNUPLOT
 #   include "gnuplot_i.h"
     gnuplot_ctrl* h_gnuplot;
@@ -64,10 +64,14 @@ void poisson_ellpack(const int N, const float c, const float epsilon, float* x, 
 	for (i = 0; err > epsilon; ++i) {
 		ELL_kernel(N, num_cols_per_row, indices_d, data_d, x_d, y_d);
 		// TODO: err = || y_d || 
+        cublasSnrm2(cublasHandle, N, y_d, 1, &err);
 		// TODO: x_d = x_d + dt / (dx * dx) * c * y_d
+        float alpha = dt / (dx * dx) * c;
+        cublasSaxpy(cublasHandle, N, &alpha, y_d, 1, x_d, 1);
 		if ((i & 511) == 0 || err > epsilon) {
 			// Copy back for output.
 			// TODO: x = x_d
+            cublasGetVector(N, sizeof(float), x_d, 1, x, 1);
             #if defined GNUPLOT
     		    static struct timespec sleep_time;
     		    sleep_time.tv_sec = 0;
