@@ -13,8 +13,12 @@
 
 typedef int bool;
 
+enum Kernel {
+    ELLPACK, Band, cuSPARSE
+};
+
 extern void pageRank(int* ptr, int* J, float* Val, const int N, const int nnz, const bool bVectorizedCSR);
-extern void poisson(const int N, const bool bCuSparse);
+extern void poisson(const int N, const enum Kernel kernel);
 
 int M, N, nnz;
 int i, *I, *J, *ptr;
@@ -23,7 +27,7 @@ float *Val;
 /**
  * Read Matrix from disk.
  */
-void loadMarketMatrix(char *file) {
+int loadMarketMatrix(char *file) {
 	int ret_code;
 	MM_typecode matcode;
 	FILE *f;
@@ -110,11 +114,13 @@ void loadMarketMatrix(char *file) {
 	// write out matrix information
 	mm_write_banner(stdout, matcode);
 	mm_write_mtx_crd_size(stdout, N, N, nnz);
+    return 0;
 }
 
 int main(int argc, char *argv[])
 {
-	bool bPageRank = 0, bHeatEquation = 0, bCuSparse = 0;
+	bool bPageRank = 0, bHeatEquation = 0;
+	int  kernel = 0;
 	bool bVectorizedCSR = 0;
 	int heat_eq_size = 64;
 	int i = 1;
@@ -157,9 +163,14 @@ int main(int argc, char *argv[])
 
 			if (i < argc && strcmp(argv[i], "-C") == 0) {
 				i++;
-				bCuSparse = 1;
-				printf("Heat equation (CuSparse)\n");
+				kernel = cuSPARSE;
+				printf("Heat equation (cuSparse)\n");
+			} else if (i < argc && strcmp(argv[i], "-B") == 0) {
+				i++;
+				kernel = Band;
+				printf("Heat equation (Band)\n");
 			} else {
+				kernel = ELLPACK;
 				printf("Heat equation (Ellpack)\n");
 			}
 
@@ -174,13 +185,13 @@ int main(int argc, char *argv[])
 			/* solve poisson 1D     */
 			/************************/
 
-		   	poisson(heat_eq_size, bCuSparse);
+		   	poisson(heat_eq_size, kernel);
 		} else {
 			fprintf(stderr, "Usage: %s [-P [-V] <market_matrix_filename>] [-H [-C] [<matrix_size>]]\n", argv[0]);
 			exit(1);
 		}
 	}
 
-    return 0;
+	return 0;
 }
 

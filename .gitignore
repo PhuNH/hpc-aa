@@ -33,3 +33,4 @@
 
 /t3/mtx/*
 !/t3/mtx/my.mtx
+/t4/*.pdf

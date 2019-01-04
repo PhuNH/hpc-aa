@@ -10,8 +10,9 @@
 #include <math.h>
 #include "gnuplot_i.h"
 #include "kernels.h"
+typedef int bool;
 
-void pageRank(int* ptr, int* J, float* Val, const int N, const int nnz, const int bVectorizedCSR) {
+void pageRank(int* ptr, int* J, float* Val, const int N, const int nnz, const bool bVectorizedCSR) {
 	const float alpha = 0.85, epsilon = 1.0e-4;
 	float *x = (float *) malloc(N * sizeof(float));
 	float *y = (float *) malloc(N * sizeof(float));
@@ -109,7 +110,7 @@ void pageRank(int* ptr, int* J, float* Val, const int N, const int nnz, const in
         }
 	}
 
-    printf("\nMaximum:\nx_%d = %e\n", i_max + 1, x_max);
+    printf("\nMaximum:\nx_%d = %e\n", i_max, x_max);
 
 	gnuplot_plot_xf(h_gnuplot, x, N, "Rank");
 

@@ -11,4 +11,7 @@ void ELL_create(int N, int num_cols_per_row, int * indices, float * data , float
 void ELL_kernel(int N, int num_cols_per_row , int * indices_d, float * data_d , float * x_d , float * y_d);
 void ELL_destroy(int* indices_d, float* data_d, float* x_d, float* y_d);
 
+void band_create(int N, int num_cols_per_row, float * data , float * x , float * y, float **data_d, float **x_d, float **y_d);
+void band_kernel(int N, int num_cols_per_row , float * data_d , float * x_d , float * y_d);
+void band_destroy(float* data_d, float* x_d, float* y_d);
 #endif
