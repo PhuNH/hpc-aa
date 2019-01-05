@@ -14,7 +14,7 @@
 #include <cusparse_v2.h>
 #include <cublas_v2.h>
 
-#define GNUPLOT
+//#define GNUPLOT
 
 #if defined GNUPLOT
 #   include "gnuplot_i.h"
@@ -167,7 +167,6 @@ void poisson_cusparse(const int N, const float c, const float epsilon, float* x,
 	float dx = 1.0 / (float)(N - 1);
 	float dt = (0.5f * dx * dx) / c;
 	char s_tmp[64];
-	cusparseHybMat_t hyb_d = NULL;
 
 	for (i = 0; i <= N; i++) {
 		start[i] = 3 * i;
@@ -201,9 +200,21 @@ void poisson_cusparse(const int N, const float c, const float epsilon, float* x,
     checkCublasError(cublasCreate(&cublasHandle));
 
     //TODO: Get handle for cuSPARSE
+    cusparseHandle_t cusparseHandle = 0;
+    cusparseStatus_t cusparseStatus;
+    checkCusparseError(cusparseCreate(&cusparseHandle));
     //TODO: convert CSR matrix to cuSPARSE hybrid matrix
+    cusparseHybMat_t hyb_d = NULL;
+    cusparseMatDescr_t descrA = NULL;
+    checkCusparseError(cusparseCreateHybMat(&hyb_d));
+    checkCusparseError(cusparseCreateMatDescr(&descrA));
+    checkCusparseError(cusparseSetMatType(descrA, CUSPARSE_MATRIX_TYPE_GENERAL));
+    checkCusparseError(cusparseSetMatIndexBase(descrA, CUSPARSE_INDEX_BASE_ZERO));
+    //checkCusparseError(cusparseSetMatFillMode(descrA, CUSPARSE_FILL_MODE_LOWER));
+    //checkCusparseError(cusparseSetMatDiagType(descrA, CUSPARSE_DIAG_TYPE_NON_UNIT));
 
     CSR_create(N, N * num_cols_per_row, start, indices, data, x , y, &start_d, &indices_d, &data_d, &x_d, &y_d);
+    checkCusparseError(cusparseScsr2hyb(cusparseHandle, N, N, descrA, data_d, start_d, indices_d, hyb_d, 3, CUSPARSE_HYB_PARTITION_MAX));
 
 	cudaFree(start_d);
 	cudaFree(indices_d);
@@ -215,7 +226,8 @@ void poisson_cusparse(const int N, const float c, const float epsilon, float* x,
 		alpha = 1.0f;
 		beta = 0.0f;
 		//TODO: Add cuSPARSE instructions
-
+        //checkCusparseError(cusparseScsrmv(cusparseHandle, CUSPARSE_OPERATION_NON_TRANSPOSE, N, N, N*3, &alpha, descrA, data_d, start_d, indices_d, x_d, &beta, y_d));
+        checkCusparseError(cusparseShybmv(cusparseHandle, CUSPARSE_OPERATION_NON_TRANSPOSE, &alpha, descrA, hyb_d, x_d, &beta, y_d));
 
     	checkCublasError(cublasSnrm2(cublasHandle, N, y_d, 1, &err));
 
@@ -239,7 +251,9 @@ void poisson_cusparse(const int N, const float c, const float epsilon, float* x,
 	cudaFree(y_d);
 
 	//TODO: Destroy Hybrid matrix and the cuSparse handle.
-
+    checkCusparseError(cusparseDestroyMatDescr(descrA));
+    checkCusparseError(cusparseDestroyHybMat(hyb_d));
+    checkCusparseError(cusparseDestroy(cusparseHandle));
 
 	free(start);
 	free(indices);
